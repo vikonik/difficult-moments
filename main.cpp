@@ -1,204 +1,84 @@
+/*
+   1 Реализуйте шаблонную функцию Swap, которая принимает два указателя и обменивает местами значения, на которые указывают эти указатели.
+   2 Реализуйте шаблонную функцию SortPointers, которая принимает вектор указателей и сортирует указатели по значениям, на которые они указывают.
+   3 Подсчитайте количество гласных букв в книге “Война и мир”. Для подсчета используйте 4 способа:
+        ○ count_if и find
+        ○ count_if и цикл for
+        ○ цикл for и find
+        ○ 2 цикла for
+
+Замерьте время каждого способа подсчета и сделайте выводы.
+Справка:
+count_if - это алгоритмическая функция из STL, которая принимает 3 параметра: итератор на начало, итератор на конец и унарный предикат (функцию, принимающую один параметр и возвращающую тип bool).
+find - это метод класса string, который возвращает позицию символа (строки), переданного в качестве параметра, в исходной строке. Если символ не найден, то метод возвращает string::npos.
+
+*/
+
 #include <iostream>
-#include <fstream>
-#include <vector>
-#include <utility>
-#include <string>
-#include <optional>
 #include <algorithm>
+#include <vector>
+#include <clocale>
+
+#include "Timer.h"
 
 using namespace std;
 
-struct Person{
-    string lastName;
-    string firstName;
-    std::string patronymic;
-};
-
-//переопределяем оператор ввода для структуры Person
-std::istream& operator>> (std::istream &in, Person &person)
-{
-    in >> person.firstName;
-    in >> person.lastName;
-    in >> person.patronymic;
-    return in;
+/*
+Шаблонная фуикция Swap
+*/
+template <typename T>
+void Swap( T *a , T *b){
+    T tmp = *b;
+    *b = *a;
+    *a = tmp;
 }
 
-//переопределяем оператор вывода для структуры Person
-std::ostream& operator<< (std::ostream &out, const Person &person)
+/*
+Шаблонная фуикция SortPointers
+*/
+template <typename T>
+void SortPointers(vector<T> *a){
+    sort(a->begin(),a->end());
+}
+
+//Русские буквы не воспинимает, поэтому используем латинские
+char vowelLtter[6]={'a','e', 'i', 'o', 'u','y'};
+//Это попытка написать функцию для работы с count_if
+bool isVowelLtter(int i, int num)
 {
-    out << "Person:" << endl;
-    out << "    firstName " << person.firstName << endl;
-    out << "    firstName " << person.lastName << endl;
-    out << "    firstName " << person.patronymic << endl;
-    return out;
+    if (i < num)
+        return true;
+    else
+        return false;
 }
 
 
-//Для этой структуры перегрузите оператор вывода. Необходимо, чтобы номер телефона
-//выводился в формате: +7(911)1234567 12, где 7 – это номер страны, 911 – номер города,
-//1234567 – номер, 12 – добавочный номер. Если добавочного номера нет, то его выводить не
-//надо.
 
-struct PhoneNumber{
-    int countryCode;
-    int cityCode;
-    string number;
-    int extensionNumber;
-
-};
-//переопределяем оператор ввода для структуры PhoneNumber
-std::istream& operator>> (std::istream &in, PhoneNumber &phoneNumber)
-{
-    in >> phoneNumber.countryCode;
-    in >> phoneNumber.cityCode;
-    in >> phoneNumber.number;
-    in >> phoneNumber.extensionNumber;
-    return in;
+/*
+Считаем буквы 2 цикла for
+*/
+int usingFor(string *data, int size){
+    Timer timer("for & for");
+    int cnt = 0;
+    string str = "asdfsadf";
+    for(int i = 0; i < size; i++){
+        for(int j = 0; j < sizeof(vowelLtter); j++){
+           std::string:find
+            if((*data) == vowelLtter[j]){//vowelLtter[j]
+                cnt++;
+                break;
+            }
+        }
+    }
+    timer.print();
+    return cnt;
 }
-
-//переопределяем оператор вывода для структуры PhoneNumber
-std::ostream& operator<< (std::ostream &out, const PhoneNumber &phoneNumber)
-{
-    out << "+" << phoneNumber.countryCode <<"("<<phoneNumber.cityCode<<")"  << phoneNumber.number<<" "<< phoneNumber.extensionNumber<<endl;
-    return out;
-}
-
 
 /**/
-bool cmp(const std::pair<Person, PhoneNumber> &lhs, const std::pair<Person, PhoneNumber> &rhs)
-{
-    return lhs.second.number < rhs.second.number;
-}
-
-
-Person person;
-PhoneNumber phone;
-class PhoneBook{
-public:
-//private:
-    //Это называется вектор пар, здесь хранятся пары
-    std::vector<std::pair<Person, PhoneNumber>> phonebook;
-
-
-public:
-    PhoneBook(istream& is) {
-        while (!is.eof()) {
-            Person person;
-            PhoneNumber phone;
-            is >> person;
-            is >> phone;
-            phonebook.push_back(std::make_pair(person, phone));
-        }
-
-
-    }
-    ~PhoneBook() {}
-
-
-
-    /*
-     * Лямбда
-     * [внешние переменные доступ ккоторым нужен из тела функции](аргументы функции){тело функции}
-     *
-     */
-    void SortByName(){
-        std::sort(phonebook.begin(), phonebook.end(), [](const std::pair<Person, PhoneNumber> &lhs, const std::pair<Person, PhoneNumber> &rhs)
-        {
-            return lhs.first.lastName < rhs.first.lastName;
-        });
-
-    }
-
-
-    void SortByPhone(){
-        std::sort(phonebook.begin(), phonebook.end(), [](const std::pair<Person, PhoneNumber> &lhs, const std::pair<Person, PhoneNumber> &rhs)
-        {
-            return lhs.second.number < rhs.second.number;
-        });
-    }
-
-    void GetPhoneNumber(){}
-    void ChangePhoneNumber(){}
-
-    void AddData(){//ну надо как-то забить даные
-
-
-    }
-    friend std::istream& operator>> (std::istream &in, PhoneBook &phoneBook);
-    friend std::ostream& operator<< (std::ostream &out, const PhoneBook &phoneBook);
-
-};
-
-std::istream& operator>>(std::istream &in, PhoneBook &phoneBook)
-{
-    in >> person;
-    in >> phone;
-    auto p = std::make_pair(person, phone);
-    phoneBook.phonebook.push_back(p);
-
-    return in;
-}
-
-//не переопределяется оператор вывода
-//проблема: внутри не видится phoneBook.phonebook.pop_back(); нет такого метода
-std::ostream& operator<< (std::ostream &out, const PhoneBook &phoneBook)
-{
-//    phoneBook.phonebook.?;//что тут должно быть?
-    return out;
-}
-
-
-
-
-
-
-//формат хранения данных в файле?
-//как прочитанные данные из файла поместить в вектор пар?
-//как при добавлении данных в вектор пар обрабатывать опциональный тип?
-//как применить опциональный тип конкретно в этом случае?
-
 int main()
 {
 
-    std::string path = "D:\\PhoneBook.txt";
-    fstream file(path);//прочитали файл PhoneBook.txt
 
-    if (!file.is_open()){ // если файл не открыт
-            cout << "Can not open file!\n"; // сообщить об этом
-            return 0;
-    }
 
-    PhoneBook book(file);
-    cout << book;
-    PhoneNumber phone;
-    cout << "------SortByPhone-------" << endl;
-    book.SortByPhone();
-//    cout << book;
-//    cout << "------SortByName--------" << endl;
-//    book.SortByName();
-//    cout << book;
-//    cout << "-----GetPhoneNumber-----" << endl;
-//    // лямбда функция, которая принимает фамилию и выводит номер телефона
-//    //этого человека, либо строку с ошибкой
-//            auto print_phone_number = [&book](const string& surname) {
-//        cout << surname << "\t";
-//        auto answer = book.GetPhoneNumber(surname);
-//        if (get<0>(answer).empty())
-//            cout << get<1>(answer);
-//        else
-//            cout << get<0>(answer);
-//        cout << endl;
-//    };
-//    // вызовы лямбды
-//    print_phone_number("Ivanov");
-//    print_phone_number("Petrov");
-//    cout << "----ChangePhoneNumber----" << endl;
-//    book.ChangePhoneNumber(Person{ "Kotov", "Vasilii", "Eliseevich" },
-//                           PhoneNumber{7, 123, "15344458", nullopt});
-//    book.ChangePhoneNumber(Person{ "Mironova", "Margarita", "Vladimirovna" },
-//                           PhoneNumber{ 16, 465, "9155448", 13 });
-//    cout << book;
-    cout << "Hello World!" << endl;
-    system("pause");
     return 0;
 }
